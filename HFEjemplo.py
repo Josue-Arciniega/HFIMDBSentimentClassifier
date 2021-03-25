@@ -12,10 +12,10 @@ flags.DEFINE_integer('epochs',10,'')
 flags.DEFINE_float('lr',1e-2,'')
 flags.DEFINE_float('momentum',.9,'')
 flags.DEFINE_string('model','bert-base-uncased','')
-flags.DEFINE_integer('seq_length',32 ,'')
+flags.DEFINE_integer('seq_length',6 ,'')
 flags.DEFINE_boolean('debug',False,'')
-flags.DEFINE_integer('samples',9,'')
-flags.DEFINE_integer('batch_size',9,'')
+flags.DEFINE_integer('samples',10,'')
+flags.DEFINE_integer('batch_size',10,'')
 flags.DEFINE_integer('ds_percent',100,'')
 
 FLAGS=flags.FLAGS
@@ -41,14 +41,16 @@ class IMDBSentimentClassifier(pl.LightningModule):
                     pad_to_max_length=True)
             return x
         def _prepare_ds(split):
-            ds = nlp.load_dataset('imdb',split=f'{split}[:{FLAGS.samples if FLAGS.debug else f"{FLAGS.ds_percent}%"}]')
+            ds = nlp.load_dataset('imdb',split=f'{split}[:{FLAGS.samples if FLAGS.debug else f"{FLAGS.ds_percent}%"}]') 
+            #import IPython ; IPython.embed() ; exit(1)
+            ds=ds.shuffle()
+            #ds=ds[:1250]
             ds=ds.map(_tokenize)
             ds.set_format(type='torch',columns=['input_ids','label' ])
             return ds
         #self.train_ds=prepare_ds('train')
         #self.test_ds=prepare_ds('test')
         self.train_ds,self.test_ds=map(_prepare_ds,('train','test'))
-        #import IPython ; IPython.embed() ; exit(1)
     
     def forward(self,input_ids):
         mask=(input_ids!=0).float()
@@ -80,7 +82,7 @@ class IMDBSentimentClassifier(pl.LightningModule):
         return {**out,'log':out}
      
     def train_dataloader(self):
-        import IPython; IPython.embed()
+        #import IPython; IPython.embed()
         return th.utils.data.DataLoader(
                 self.train_ds,
                 num_workers=4,

@@ -1,0 +1,6 @@
+absl==0.0
+nlp==0.4.0
+pytorch_lightning==1.2.5
+sh==1.14.1
+torch==1.8.1
+transformers==4.4.2
